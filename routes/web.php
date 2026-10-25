@@ -16,9 +16,8 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     
     // 1. Route Dashboard (Cukup satu saja di sini)
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+   Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+    ->name('dashboard');
 
     // 2. Route Profile Bawaan Breeze
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -30,6 +29,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('books', BookController::class);
     Route::resource('members', MemberController::class);
     Route::resource('borrowings', BorrowingController::class);
+
+    Route::patch(
+        '/borrowings/{borrowing}/return',
+        [BorrowingController::class, 'returnBook']
+    )->name('borrowings.return');
+
     Route::resource('users', UserController::class);
 });
 
