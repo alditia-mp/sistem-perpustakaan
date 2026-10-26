@@ -10,8 +10,17 @@ class Member extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'email', 'phone', 'address'];
+    /**
+     * Kolom yang boleh diisi melalui proses create dan update.
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'address',
+    ];
 
+   
     public function borrowings(): HasMany
     {
         return $this->hasMany(Borrowing::class);
