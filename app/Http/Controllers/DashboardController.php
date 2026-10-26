@@ -12,9 +12,6 @@ class DashboardController extends Controller
         $totalBooks = Book::count();
         $totalMembers = Member::count();
 
-        return view('dashboard', compact(
-            'totalBooks',
-            'totalMembers'
-        ));
+        return view('dashboard', compact('totalBooks', 'totalMembers'));
     }
 }

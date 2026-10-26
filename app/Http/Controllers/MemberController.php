@@ -32,7 +32,7 @@ class MemberController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:members,email,' . ($member->id ?? ''),
+            'email' => 'required|email|max:255|unique:members,email',
             'phone' => 'required|string|max:20',
             'address' => 'required|string',
         ]);
