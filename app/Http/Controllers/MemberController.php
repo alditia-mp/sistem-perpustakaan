@@ -32,9 +32,9 @@ class MemberController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:members,email',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'email' => 'required|email|unique:members,email,' . ($member->id ?? ''),
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string',
         ]);
 
         Member::create($validated);
