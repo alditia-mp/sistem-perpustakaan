@@ -16,7 +16,7 @@ class BookRequest extends FormRequest
     {
         return [
             'category_id' => ['required', 'exists:categories,id'],
-            'title'       => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255', 'unique:books,title'],
             'author'      => ['required', 'string', 'max:255'],
             'year'        => ['required', 'integer', 'min:1000', 'max:' . date('Y')],
             'stock'       => ['required', 'integer', 'min:0'],
