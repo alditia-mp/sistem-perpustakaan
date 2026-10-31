@@ -5,14 +5,29 @@ namespace App\Http\Controllers;
 use App\Http\Requests\BookRequest;
 use App\Models\Book;
 use App\Models\Category;
+use Illuminate\Http\Request;
 
 class BookController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::with('category')->orderBy('title')->paginate(10);
+        $search = $request->input('search');
+        $categoryId = $request->input('category_id');
 
-        return view('books.index', compact('books'));
+        $query = Book::with('category');
+
+        if ($search) {
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        $books = $query->orderBy('title')->paginate(10)->withQueryString();
+        $categories = Category::orderBy('name')->get();
+
+        return view('books.index', compact('books', 'categories', 'search', 'categoryId'));
     }
 
     public function create()
@@ -24,7 +39,15 @@ class BookController extends Controller
 
     public function store(BookRequest $request)
     {
-        Book::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('cover')) {
+            $data['cover'] = $request->file('cover')->store('covers', 'public');
+        } else {
+            unset($data['cover']);
+        }
+
+        Book::create($data);
 
         return redirect()->route('books.index')
             ->with('success', 'Buku berhasil ditambahkan.');
@@ -46,7 +69,15 @@ class BookController extends Controller
 
     public function update(BookRequest $request, Book $book)
     {
-        $book->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('cover')) {
+            $data['cover'] = $request->file('cover')->store('covers', 'public');
+        } else {
+            unset($data['cover']);
+        }
+
+        $book->update($data);
 
         return redirect()->route('books.index')
             ->with('success', 'Buku berhasil diperbarui.');

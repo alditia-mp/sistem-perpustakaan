@@ -16,6 +16,28 @@
                 <a href="{{ route('books.create') }}"
                    class="inline-block mb-4 px-4 py-2 bg-gray-800 text-white rounded">Tambah Buku</a>
 
+                <form action="{{ route('books.index') }}" method="GET" class="mb-4 flex flex-wrap gap-2">
+                <input type="text" name="search" value="{{ $search }}"
+                    placeholder="Cari judul buku..."
+                    class="rounded-md border-gray-300 shadow-sm">
+
+                <select name="category_id" class="rounded-md border-gray-300 shadow-sm">
+                    <option value="">Semua kategori</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}"
+                            {{ $categoryId == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <button type="submit" class="rounded-md bg-gray-700 px-4 py-2 text-white">Cari</button>
+
+                @if ($search || $categoryId)
+                    <a href="{{ route('books.index') }}" class="rounded-md border px-4 py-2">Reset</a>
+                @endif
+            </form>
+
                 <table class="w-full text-left border">
                     <thead class="bg-gray-100">
                         <tr>
@@ -36,7 +58,13 @@
                                 <td class="p-2 border">{{ $book->author }}</td>
                                 <td class="p-2 border">{{ $book->category?->name ?? 'Belum ada kategori' }}</td>
                                 <td class="p-2 border">{{ $book->year }}</td>
-                                <td class="p-2 border">{{ $book->stock }}</td>
+                                <td class="p-2 border">
+                                    @if ($book->stock == 0)
+                                        <span class="text-red-600 font-semibold">Habis</span>
+                                    @else
+                                        {{ $book->stock }}
+                                    @endif
+                                </td>
                                 <td class="p-2 border">
                                     <a href="{{ route('books.show', $book) }}" class="text-blue-600 mr-3">Detail</a>
                                     <a href="{{ route('books.edit', $book) }}" class="text-yellow-600 mr-3">Edit</a>
@@ -49,7 +77,15 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="7" class="p-2 text-center">Belum ada buku.</td></tr>
+                            <tr>
+                                <td colspan="7" class="p-2 text-center">
+                                    @if ($search || $categoryId)
+                                        Buku tidak ditemukan.
+                                    @else
+                                        Belum ada buku.
+                                    @endif
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>

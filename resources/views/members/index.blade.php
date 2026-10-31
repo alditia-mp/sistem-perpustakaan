@@ -15,6 +15,10 @@
                 </div>
             @endif
 
+            @if (session('error'))
+                <div class="mb-4 p-4 bg-red-100 text-red-800 rounded">{{ session('error') }}</div>
+            @endif
+
             @if ($errors->any())
                 <div class="mb-4 rounded bg-red-100 p-4 text-red-700">
                     <ul class="list-disc pl-5">
@@ -89,8 +93,14 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-2">
+
+                                        <a href="{{ route('members.show', $member->id) }}"
+                                            class="text-gray-600 hover:underline">
+                                            Detail
+                                        </a>
+
                                         <a href="{{ route('members.edit', $member->id) }}"
-                                           class="text-blue-600 hover:underline">
+                                            class="text-blue-600 hover:underline">
                                             Edit
                                         </a>
 

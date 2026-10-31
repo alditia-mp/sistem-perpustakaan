@@ -70,8 +70,8 @@ class MemberController extends Controller
                 'max:255',
                 Rule::unique('members', 'email')->ignore($member->id),
             ],
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string',
         ]);
 
         $member->update($validated);
@@ -84,6 +84,14 @@ class MemberController extends Controller
     public function destroy(string $id)
     {
         $member = Member::findOrFail($id);
+
+        if ($member->borrowings()->exists()) {
+            
+            return redirect()
+                ->route('members.index')
+                ->with('error', 'Anggota tidak bisa dihapus karena masih punya riwayat peminjaman.');
+        }
+
         $member->delete();
 
         return redirect()

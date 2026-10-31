@@ -16,7 +16,10 @@ class BookRequest extends FormRequest
     {
         return [
             'category_id' => ['required', 'exists:categories,id'],
-            'title' => ['required', 'string', 'max:255', 'unique:books,title'],
+            'title' => [
+                'required', 'string', 'max:255',
+                Rule::unique('books', 'title')->ignore($this->route('book')),
+            ],
             'author'      => ['required', 'string', 'max:255'],
             'year'        => ['required', 'integer', 'min:1000', 'max:' . date('Y')],
             'stock'       => ['required', 'integer', 'min:0'],
@@ -24,6 +27,7 @@ class BookRequest extends FormRequest
                 'nullable', 'string', 'max:20',
                 Rule::unique('books', 'isbn')->ignore($this->route('book')),
             ],
+            'cover'       => ['nullable', 'image', 'max:2048']
         ];
     }
 
@@ -36,6 +40,8 @@ class BookRequest extends FormRequest
             'year.required'        => 'Tahun terbit wajib diisi.',
             'stock.required'       => 'Stok wajib diisi.',
             'isbn.unique'          => 'ISBN sudah terdaftar.',
+            'cover.image'          => 'Cover harus berupa gambar.',
+            'cover.max'            => 'Ukuran cover maksimal 2 MB.',
         ];
     }
 }

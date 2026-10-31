@@ -47,3 +47,13 @@
                   :value="old('isbn', $book->isbn ?? '')" />
     <x-input-error :messages="$errors->get('isbn')" class="mt-2" />
 </div>
+
+<div class="mt-4">
+    <x-input-label for="cover" value="Cover Buku (opsional)" />
+    <input id="cover" name="cover" type="file" accept="image/*" class="mt-1 block w-full">
+    <x-input-error :messages="$errors->get('cover')" class="mt-2" />
+
+    @if (!empty($book->cover))
+        <img src="{{ asset('storage/' . $book->cover) }}" alt="Cover saat ini" class="mt-2 h-24 rounded">
+    @endif
+</div>

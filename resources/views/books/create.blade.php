@@ -5,8 +5,8 @@
 
     <div class="py-12">
         <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
-            <form action="{{ route('books.store') }}" method="POST"
-                  class="bg-white shadow-sm sm:rounded-lg p-6">
+            <form action="{{ route('books.store') }}" method="POST" enctype="multipart/form-data"
+                class="bg-white shadow-sm sm:rounded-lg p-6">
                 @csrf
                 @include('books._form')
                 <div class="mt-6 flex items-center gap-3">
