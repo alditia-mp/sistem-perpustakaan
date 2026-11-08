@@ -10,7 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController; // Tambahkan ini biar rapi
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 // Gabungkan semua route yang membutuhkan autentikasi ke dalam satu group
@@ -25,11 +25,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // 3. Route Resource untuk CRUD Modul Perpustakaan
-    Route::resource('categories', CategoryController::class);
+    Route::resource('categories', CategoryController::class)->only('index');
     Route::resource('books', BookController::class);
     Route::resource('members', MemberController::class);
     Route::resource('borrowings', BorrowingController::class);
-    Route::resource('users', UserController::class);
+    
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('categories', CategoryController::class)->except(['index', 'show']);
+        Route::resource('users', UserController::class)->except('show');
+    });
 
     // 4. Route Khusus Pengembalian Buku (Hanya dibuat SATU KALI)
     Route::patch('/borrowings/{borrowing}/return', [BorrowingController::class, 'returnBook'])->name('borrowings.return');
