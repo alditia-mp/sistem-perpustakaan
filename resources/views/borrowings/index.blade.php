@@ -1,4 +1,4 @@
-
+```blade
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -43,8 +43,7 @@
                             <tr>
                                 <th class="border p-3 text-left">No.</th>
                                 <th class="border p-3 text-left">Anggota</th>
-                                <th class="border p-3 text-left">Buku</th>
-                                <th class="border p-3 text-left">Jumlah</th>
+                                <th class="border p-3 text-left">Buku & Jumlah</th>
                                 <th class="border p-3 text-left">Tanggal Pinjam</th>
                                 <th class="border p-3 text-left">Batas Kembali</th>
                                 <th class="border p-3 text-left">Tanggal Kembali</th>
@@ -65,15 +64,18 @@
                                     </td>
 
                                     <td class="border p-3">
-                                        @foreach ($borrowing->details as $detail)
-                                            <div>{{ $detail->book->title }}</div>
-                                        @endforeach
-                                    </td>
-
-                                    <td class="border p-3">
-                                        @foreach ($borrowing->details as $detail)
-                                            <div>{{ $detail->qty }}</div>
-                                        @endforeach
+                                        <div class="space-y-2">
+                                            @foreach ($borrowing->details as $detail)
+                                                <div>
+                                                    <p class="font-medium text-gray-800">
+                                                        {{ $detail->book->title }}
+                                                    </p>
+                                                    <p class="text-sm text-gray-500">
+                                                        Jumlah: {{ $detail->qty }} buku
+                                                    </p>
+                                                </div>
+                                            @endforeach
+                                        </div>
                                     </td>
 
                                     <td class="border p-3">
@@ -127,7 +129,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="border p-5 text-center text-gray-500">
+                                    <td colspan="8" class="border p-5 text-center text-gray-500">
                                         Belum ada data peminjaman.
                                     </td>
                                 </tr>
