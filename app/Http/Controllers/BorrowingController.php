@@ -26,6 +26,7 @@ class BorrowingController extends Controller
     public function create()
     {
         $members = Member::orderBy('name')->get();
+
         $books = Book::where('stock', '>', 0)
             ->orderBy('title')
             ->get();
@@ -37,44 +38,66 @@ class BorrowingController extends Controller
     {
         $validated = $request->validate([
             'member_id' => 'required|exists:members,id',
-            'book_id' => 'required|exists:books,id',
-            'qty' => 'required|integer|min:1',
-            'borrow_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:borrow_date',
+            'items' => 'required|array',
+            'items.*' => 'required|integer|min:0',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            $book = Book::whereKey($validated['book_id'])
-                ->lockForUpdate()
-                ->firstOrFail();
+        $items = collect($validated['items'])
+            ->filter(fn ($qty) => $qty > 0);
 
-            if ($book->stock < $validated['qty']) {
-                throw ValidationException::withMessages([
-                    'qty' => 'Stok buku tidak mencukupi. Stok tersedia: '
-                        . $book->stock,
-                ]);
+        if ($items->isEmpty()) {
+            throw ValidationException::withMessages([
+                'items' => 'Pilih minimal satu buku untuk dipinjam.',
+            ]);
+        }
+
+        DB::transaction(function () use ($validated, $items) {
+            $books = Book::whereIn('id', $items->keys())
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            foreach ($items as $bookId => $qty) {
+                $book = $books->get($bookId);
+
+                if (!$book) {
+                    throw ValidationException::withMessages([
+                        'items' => 'Buku yang dipilih tidak ditemukan.',
+                    ]);
+                }
+
+                if ($book->stock < $qty) {
+                    throw ValidationException::withMessages([
+                        'items' => "Stok buku {$book->title} tidak mencukupi. Stok tersedia: {$book->stock}.",
+                    ]);
+                }
             }
+
+            $borrowDate = now()->toDateString();
+            $dueDate = now()->addDays(7)->toDateString();
 
             $borrowing = Borrowing::create([
                 'user_id' => auth()->id(),
                 'member_id' => $validated['member_id'],
-                'borrow_date' => $validated['borrow_date'],
-                'due_date' => $validated['due_date'],
+                'borrow_date' => $borrowDate,
+                'due_date' => $dueDate,
                 'status' => 'borrowed',
             ]);
 
-            BorrowingDetail::create([
-                'borrowing_id' => $borrowing->id,
-                'book_id' => $book->id,
-                'qty' => $validated['qty'],
-            ]);
+            foreach ($items as $bookId => $qty) {
+                BorrowingDetail::create([
+                    'borrowing_id' => $borrowing->id,
+                    'book_id' => $bookId,
+                    'qty' => $qty,
+                ]);
 
-            $book->decrement('stock', $validated['qty']);
+                $books->get($bookId)->decrement('stock', $qty);
+            }
         });
 
         return redirect()
             ->route('borrowings.index')
-            ->with('success', 'Peminjaman berhasil ditambahkan.');
+            ->with('success', 'Peminjaman beberapa buku berhasil ditambahkan.');
     }
 
     public function show(string $id)
