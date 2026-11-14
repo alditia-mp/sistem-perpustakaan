@@ -15,6 +15,13 @@
                     </div>
                 @endif
 
+                {{-- Pesan error (hapus akun sendiri / user pernah memproses peminjaman) --}}
+                @if(session('error'))
+                    <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <!-- Tombol Tambah -->
                 <a href="{{ route('users.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-block mb-4">
                     + Tambah User
