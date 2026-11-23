@@ -33,9 +33,9 @@ class MemberController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:members,email',
-            'phone' => 'required|string|max:20',
+            'phone' => ['required', 'regex:/^\+?[0-9]+$/', 'min:8', 'max:15'],
             'address' => 'required|string',
-        ]);
+        ], $this->phoneMessages());
 
         Member::create($validated);
 
@@ -70,9 +70,9 @@ class MemberController extends Controller
                 'max:255',
                 Rule::unique('members', 'email')->ignore($member->id),
             ],
-            'phone' => 'required|string|max:20',
+            'phone' => ['required', 'regex:/^\+?[0-9]+$/', 'min:8', 'max:15'],
             'address' => 'required|string',
-        ]);
+        ], $this->phoneMessages());
 
         $member->update($validated);
 
@@ -86,7 +86,7 @@ class MemberController extends Controller
         $member = Member::findOrFail($id);
 
         if ($member->borrowings()->exists()) {
-            
+
             return redirect()
                 ->route('members.index')
                 ->with('error', 'Anggota tidak bisa dihapus karena masih punya riwayat peminjaman.');
@@ -97,5 +97,14 @@ class MemberController extends Controller
         return redirect()
             ->route('members.index')
             ->with('success', 'Anggota berhasil dihapus.');
+    }
+
+    private function phoneMessages(): array
+    {
+        return [
+            'phone.regex' => 'Nomor telepon hanya boleh angka (boleh diawali +).',
+            'phone.min'   => 'Nomor telepon minimal 8 karakter.',
+            'phone.max'   => 'Nomor telepon maksimal 15 karakter.',
+        ];
     }
 }

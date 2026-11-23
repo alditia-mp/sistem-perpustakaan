@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Borrowing;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -52,6 +53,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role' => 'required|in:admin,petugas',
+            'password' => 'nullable|string|min:8',
+        ], [
+            'password.min' => 'Password minimal 8 karakter.',
         ]);
 
         $user->name = $request->name;
@@ -59,7 +63,7 @@ class UserController extends Controller
         $user->role = $request->role;
 
         // Cek jika password diisi, baru diupdate
-        if ($request->password) {
+        if ($request->filled('password')) {
             $user->password = bcrypt($request->password);
         }
 
@@ -70,7 +74,18 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        if ($user->id === auth()->id()) {
+            return redirect()->route('users.index')
+                ->with('error', 'Kamu tidak bisa menghapus akunmu sendiri.');
+        }
+
+        if (Borrowing::where('user_id', $user->id)->exists()) {
+            return redirect()->route('users.index')
+                ->with('error', 'User tidak bisa dihapus karena pernah memproses peminjaman.');
+        }
+
         $user->delete();
+
         return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
     }
 }
