@@ -23,7 +23,7 @@
                 <form action="{{ route('borrowings.store') }}" method="POST">
                     @csrf
 
-                    <div class="mb-4">
+                    <div class="mb-6">
                         <label for="member_id" class="mb-1 block font-medium">
                             Anggota
                         </label>
@@ -48,57 +48,45 @@
                     </div>
 
                     <div class="mb-4">
-                        <label for="book_id" class="mb-1 block font-medium">
-                            Buku
-                        </label>
+                        <h3 class="font-semibold text-gray-800">
+                            Pilih Buku
+                        </h3>
+                        <p class="mb-3 text-sm text-gray-500">
+                            Masukkan jumlah buku yang ingin dipinjam. Isi 0 jika tidak dipinjam.
+                        </p>
 
-                        <select name="book_id" id="book_id" required
-                                class="w-full rounded border-gray-300">
-                            <option value="">-- Pilih Buku --</option>
+                        @forelse ($books as $book)
+                            <div class="mb-3 flex items-center justify-between gap-4 rounded border p-3">
+                                <div>
+                                    <p class="font-medium text-gray-800">
+                                        {{ $book->title }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        Stok tersedia: {{ $book->stock }}
+                                    </p>
+                                </div>
 
-                            @foreach ($books as $book)
-                                <option value="{{ $book->id }}"
-                                    {{ old('book_id') == $book->id ? 'selected' : '' }}>
-                                    {{ $book->title }} (Stok: {{ $book->stock }})
-                                </option>
-                            @endforeach
-                        </select>
-
-                        @if ($books->isEmpty())
-                            <p class="mt-1 text-sm text-red-600">
+                                <div class="w-24">
+                                    <label for="items_{{ $book->id }}"
+                                           class="mb-1 block text-sm">
+                                        Jumlah
+                                    </label>
+                                    <input
+                                        type="number"
+                                        name="items[{{ $book->id }}]"
+                                        id="items_{{ $book->id }}"
+                                        min="0"
+                                        max="{{ $book->stock }}"
+                                        value="{{ old('items.' . $book->id, 0) }}"
+                                        class="w-full rounded border-gray-300"
+                                    >
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-sm text-red-600">
                                 Belum ada buku dengan stok tersedia.
                             </p>
-                        @endif
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="qty" class="mb-1 block font-medium">
-                            Jumlah Buku
-                        </label>
-
-                        <input type="number" name="qty" id="qty"
-                               min="1" value="{{ old('qty', 1) }}" required
-                               class="w-full rounded border-gray-300">
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="borrow_date" class="mb-1 block font-medium">
-                            Tanggal Peminjaman
-                        </label>
-
-                        <input type="date" name="borrow_date" id="borrow_date"
-                               value="{{ old('borrow_date', now()->format('Y-m-d')) }}"
-                               required class="w-full rounded border-gray-300">
-                    </div>
-
-                    <div class="mb-6">
-                        <label for="due_date" class="mb-1 block font-medium">
-                            Batas Pengembalian
-                        </label>
-
-                        <input type="date" name="due_date" id="due_date"
-                               value="{{ old('due_date', now()->addDays(7)->format('Y-m-d')) }}"
-                               required class="w-full rounded border-gray-300">
+                        @endforelse
                     </div>
 
                     <div class="flex gap-3">
